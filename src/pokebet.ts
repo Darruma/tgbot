@@ -141,6 +141,14 @@ export async function getUserBets(tgId: number) {
   };
 }
 
+export async function isBetEnabled(tgID: number) {
+  const privkey = await createOrGetWallet(tgID);
+  const wallet = await getWalletWithProvider(privkey);
+  const betContract = new ethers.Contract(BET_CONTRACT, bet_abi, wallet);
+  const state = await betContract.state();
+  return state;
+}
+
 export async function buyPoke(tgId: number, amountOfEth: number) {
   const privkey = await createOrGetWallet(tgId);
   const wallet = await getWalletWithProvider(privkey);
