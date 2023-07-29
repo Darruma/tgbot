@@ -147,7 +147,7 @@ bot.on("message", async (msg) => {
         }
         if (!msg.text) break;
         try {
-          const tx1 = await betOnOutcome(id, num1, 1, bot);
+          const tx1 = await betOnOutcome(id, num1, 0, bot);
           bot.sendMessage(chatId, `🛒 <b> Placing bet... </b>`, {
             parse_mode: "HTML",
           });
@@ -174,7 +174,7 @@ bot.on("message", async (msg) => {
         }
         if (!msg.text) break;
         try {
-          const tx = await betOnOutcome(id, num, 2, bot);
+          const tx = await betOnOutcome(id, num,1, bot);
           bot.sendMessage(chatId, `🛒 <b> Placing bet... </b>`, {
             parse_mode: "HTML",
           });
