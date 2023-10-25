@@ -1,4 +1,4 @@
-const Redis = require("ioredis");
+import { Redis } from "ioredis";
 require("dotenv").config();
 
 const redis = new Redis(process.env.REDIS_URL);

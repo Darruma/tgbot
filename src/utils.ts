@@ -1,11 +1,7 @@
-enum Outcome {
-  Pokemon1Wins,
-  Pokemon2Wins,
-}
 import { ethers, getAddress } from "ethers";
 import redis from "./redis";
 
-export async function createOrGetWallet(tgID: number) {
+export async function createOrGetWallet(tgID: string) {
   const privKey = await redis.get(tgID);
   if (privKey) {
     return privKey;
@@ -15,7 +11,7 @@ export async function createOrGetWallet(tgID: number) {
   return wallet.privateKey;
 }
 
-export async function userIsRegistered(tgID: number) {
+export async function userIsRegistered(tgID: string) {
   const privKey = await redis.get(tgID);
   if (privKey) {
     return true;
@@ -25,7 +21,7 @@ export async function userIsRegistered(tgID: number) {
 }
 
 export async function withdrawToWallet(
-  tgID: number,
+  tgID: string,
   amount: number,
   to: string
 ) {
@@ -41,8 +37,4 @@ export async function withdrawToWallet(
   } else {
     return null;
   }
-}
-
-function bet(tgId: number, amount: number, outcome: Outcome) {
-  const key = createOrGetWallet(tgId);
 }
