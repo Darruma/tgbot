@@ -2,6 +2,13 @@ import TelegramBot from "node-telegram-bot-api";
 import { userIsRegistered, createOrGetWallet, withdrawToWallet } from "./utils";
 import { ethers } from "ethers";
 import { buyTokens } from "./pokebet";
+import { Alchemy, Network } from "alchemy-sdk";
+const hexToDecimal = (hex: string) => parseInt(hex, 16);
+const settings = {
+  apiKey: "yaOs3UBcQbQ743cB2xjFvhZm0q7020BH",
+  network: Network.ETH_MAINNET,
+};
+const alchemy = new Alchemy(settings);
 
 const isAddress = ethers.isAddress;
 require("dotenv").config();
@@ -67,6 +74,22 @@ async function mainMenu(tgID: string, msg: TelegramBot.Message) {
           {
             text: "Reveal Private Key",
             callback_data: "private_key",
+          },
+        ],
+        [
+          {
+            text: "Portfolio Balances",
+            callback_data: "show_portfolio",
+          },
+          {
+            text: "Withdraw ETH",
+            callback_data: "withdraw_eth",
+          },
+        ],
+        [
+          {
+            text: "ASK AI",
+            callback_data: "ask_ai",
           },
         ],
       ],
@@ -171,6 +194,7 @@ bot.on("message", async (msg) => {
 
 bot.on("callback_query", async (query) => {
   const privkey = await createOrGetWallet(query.from.id.toString());
+  const wallet = getWalletWithProvider(privkey);
   const { data } = query;
   switch (data) {
     case "private_key":
@@ -180,7 +204,7 @@ bot.on("callback_query", async (query) => {
       bot.sendMessage(query.message.chat.id, "Buying Token...");
       bot.sendMessage(
         query.message.chat.id,
-        "Enter amount of ETH to spend on Token",
+        "Enter amount of ETH to spend on Token and token address",
         {
           reply_markup: {
             force_reply: true,
@@ -201,6 +225,34 @@ bot.on("callback_query", async (query) => {
           },
         }
       );
+      break;
+    case "show_portfolio":
+      bot.sendMessage(query.message.chat.id, "Showing Portfolio...");
+      const address = wallet.address;
+      const balances = await alchemy.core.getTokenBalances(address);
+      let messages = [
+        "🤼‍♂️ <b> AquaTrading </b> ⬩<b>  Cross trading platform </b> ⬩ <a href='aquatrading.io' > <b> Website </b> </a>  🤼",
+        "",
+        "<b>═══ Your Portfolio ═══ </b>",
+        "",
+      ];
+      for (const balance of balances.tokenBalances) {
+        const metadata = await alchemy.core.getTokenMetadata(
+          balance.contractAddress
+        );
+        const bal =
+          hexToDecimal(balance.tokenBalance || "0") /
+          10 ** (metadata.decimals || 18);
+        messages.push(
+          `🔹 <b> ${metadata.symbol} </b> (${balance.contractAddress}) : ${bal}`
+        );
+      }
+      bot.sendMessage(query.message.chat.id, messages.join("\n"), {
+        parse_mode: "HTML",
+      });
+      break;
+    case "ask_ai":
+      bot.sendMessage(query.message.chat.id, "Currently not available");
       break;
     default:
       bot.sendMessage(query.message.chat.id, "Unknown command");
